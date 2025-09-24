@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>读书笔记系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>读书笔记系统</h1>
+            <div class="header-buttons">
+                <button id="ai-toggle-button" class="header-button">AI助手</button>
+                <button id="logout-button" class="logout-button">退出登录</button>
+            </div>
+        </header>
+
+        <main>
+            <section id="note-form-section" style="display: none;">
+                <h2 id="form-title">添加新笔记</h2>
+                <form id="note-form">
+                    <input type="hidden" id="note-id">
+                    <div class="form-group">
+                        <label for="note-title">标题:</label>
+                        <input type="text" id="note-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="note-content">内容:</label>
+                        <textarea id="note-content" rows="5" required></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit">保存笔记</button>
+                        <button type="button" id="cancel-button">取消</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="search-section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>搜索笔记</h2>
+                    <button id="new-note-button">新建笔记</button>
+                </div>
+                <form id="search-form">
+                    <div class="search-group">
+                        <label for="search-title">标题:</label>
+                        <input type="text" id="search-title">
+                    </div>
+                    <div class="search-group">
+                        <label for="search-content">内容:</label>
+                        <input type="text" id="search-content">
+                    </div>
+                    <button type="submit">搜索</button>
+                    <button type="button" id="clear-search">清空搜索</button>
+                </form>
+            </section>
+
+            <section id="notes-section">
+                <h2>笔记列表</h2>
+                <div id="notes-container">
+                    <!-- 笔记将在这里显示 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- AI配置模态框 -->
+    <div id="ai-config-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI助手配置</h2>
+                <span class="close" id="close-config-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="ai-config-form">
+                    <div class="form-group">
+                        <label for="ai-endpoint">API地址:</label>
+                        <input type="text" id="ai-endpoint" placeholder="例如: https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation">
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-api-key">API密钥:</label>
+                        <input type="password" id="ai-api-key" placeholder="请输入您的API密钥">
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-agent-id">智能体ID (可选):</label>
+                        <input type="text" id="ai-agent-id" placeholder="请输入智能体ID">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="ai-enable-checkbox"> 启用AI助手
+                        </label>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit">保存配置</button>
+                        <button type="button" id="cancel-config">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI对话窗口 -->
+    <div id="ai-chat-container" class="ai-chat-container" style="display: none;">
+        <div class="ai-chat-header">
+            <h3>AI助手</h3>
+            <div class="ai-chat-controls">
+                <button id="ai-config-button" class="ai-config-button">配置</button>
+                <button id="close-ai-chat" class="close-ai-chat-button">&times;</button>
+            </div>
+        </div>
+        <div class="ai-chat-messages" id="ai-chat-messages">
+            <div class="ai-message">
+                <p>您好！我是您的AI助手，我可以帮您分析读书笔记内容，提供总结、翻译等服务。请问有什么我可以帮您的吗？</p>
+            </div>
+        </div>
+        <div class="ai-chat-input-container">
+            <textarea 
+                id="ai-chat-input" 
+                placeholder="输入您的问题，例如：请总结我的笔记内容..." 
+                rows="3"></textarea>
+            <div class="ai-chat-actions">
+                <button id="send-ai-message" class="send-ai-button">发送</button>
+                <button id="clear-ai-history" class="clear-ai-button">清空历史</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
