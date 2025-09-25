@@ -371,25 +371,31 @@ async function callAliyunAgentApi(userMessage) {
             throw new Error('未配置API密钥');
         }
         
+        // 添加调试信息
+        console.log('发起AI请求:', {
+            endpoint: aiAgentConfig.endpoint,
+            hasApiKey: !!aiAgentConfig.apiKey,
+            apiKeyLength: aiAgentConfig.apiKey.length
+        });
+        
         // 构造请求数据
         const requestData = {
-            agentId: aiAgentConfig.agentId || undefined,
-            sessionId: `session_${currentUser}_${Date.now()}`,
-            messages: [
-                {
-                    role: "user",
-                    content: `用户${currentUser}的笔记内容如下：\n${getNotesSummary()}\n\n用户的问题：${userMessage}`
-                }
-            ],
-            stream: false
+            model: 'qwen-turbo', // 指定模型
+            input: {
+                messages: [
+                    {
+                        role: "user",
+                        content: `用户${currentUser}的笔记内容如下：\n${getNotesSummary()}\n\n用户的问题：${userMessage}`
+                    }
+                ]
+            },
+            parameters: {
+                seed: Math.floor(Math.random() * 10000),
+                max_tokens: 1500
+            }
         };
         
-        // 记录请求信息用于调试
-        console.log('发起AI请求:', {
-            url: aiAgentConfig.endpoint,
-            requestData: requestData,
-            timestamp: new Date().toISOString()
-        });
+        console.log('请求数据:', JSON.stringify(requestData, null, 2));
         
         // 发起API请求
         const response = await fetch(aiAgentConfig.endpoint, {
@@ -397,29 +403,31 @@ async function callAliyunAgentApi(userMessage) {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${aiAgentConfig.apiKey}`,
-                'X-DashScope-SSE': 'enable'
+                'X-DashScope-SSE': 'disable',
+                // 添加这个头部来解决CORS问题
+                'X-DashScope-DataInspection': 'enable'
             },
             body: JSON.stringify(requestData)
         });
         
-        // 记录响应状态用于调试
-        console.log('收到AI响应:', {
-            status: response.status,
-            statusText: response.statusText,
-            timestamp: new Date().toISOString()
-        });
+        console.log('API响应状态:', response.status);
+        console.log('API响应头:', [...response.headers.entries()]);
         
         // 处理响应
         if (response.ok) {
             const data = await response.json();
-            console.log('解析的响应数据:', data);
+            console.log('API响应数据:', data);
             
-            const aiResponse = data.output.text || data.output.choices?.[0]?.message?.content || "抱歉，我没有理解您的问题。";
+            // 根据阿里云API的响应结构调整
+            const aiResponse = data.output?.text || 
+                              data.choices?.[0]?.message?.content || 
+                              "抱歉，我没有理解您的问题。";
             
             // 添加AI回复到历史记录
             addToAiChatHistory('ai', aiResponse);
         } else {
             const errorText = await response.text();
+            console.error('API错误响应:', errorText);
             throw new Error(`API请求失败: ${response.status} - ${response.statusText}. 错误详情: ${errorText}`);
         }
     } catch (error) {
